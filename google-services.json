@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "214928688643",
+    "project_id": "fifty2-46744",
+    "storage_bucket": "fifty2-46744.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:214928688643:android:22ee3213bd866423d67036",
+        "android_client_info": {
+          "package_name": "com.jouten.fifty2"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDnB5r9TFX9Euxo8KgHlomxZaFJnsTxqdY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
