@@ -21,7 +21,8 @@
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
-      "package": "com.jouten.fifty2"
+      "package": "com.jouten.fifty2",
+      "googleServicesFile": "./google-services.json"
     },
     "web": {
       "output": "static",
@@ -46,7 +47,8 @@
       [
         "expo-notifications",
         {
-          "color": "#4fc3f7"
+          "color": "#4fc3f7",
+          "defaultChannel": "default"
         }
       ]
     ],

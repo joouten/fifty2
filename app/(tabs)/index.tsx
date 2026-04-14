@@ -2,7 +2,7 @@ import { supabase } from '@/app/supabase';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Notifications from 'expo-notifications';
 import { useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, Alert, FlatList, RefreshControl, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Alert, FlatList, Platform, RefreshControl, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
 const API_KEY = process.env.EXPO_PUBLIC_TWELVE_DATA_API_KEY!;
 const DEFAULT_STOCKS = ['AAPL', 'MSFT', 'GOOGL'];
@@ -10,13 +10,22 @@ const STORAGE_KEY = 'fifty2_watchlist';
 
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
-    shouldShowAlert: true,
+    shouldShowBanner: true,
+    shouldShowList: true,
     shouldPlaySound: true,
     shouldSetBadge: false,
   }),
 });
 
 async function registerForPushNotifications() {
+  if (Platform.OS === 'android') {
+    await Notifications.setNotificationChannelAsync('default', {
+      name: 'default',
+      importance: Notifications.AndroidImportance.MAX,
+      vibrationPattern: [0, 250, 250, 250],
+      lightColor: '#4fc3f7',
+    });
+  }
   const { status: existingStatus } = await Notifications.getPermissionsAsync();
   let finalStatus = existingStatus;
   if (existingStatus !== 'granted') {
@@ -30,6 +39,7 @@ async function registerForPushNotifications() {
   const token = (await Notifications.getExpoPushTokenAsync({
     projectId: 'fe77dc3f-5b8a-454b-98e7-d7b2b0c77225'
   })).data;
+  console.log('Push token:', token);
   return token;
 }
 
@@ -114,25 +124,14 @@ export default function WatchlistScreen() {
     setRefreshing(false);
   };
 
-  const syncWatchlistToSupabase = async (list) => {
-    try {
-      const deviceId = 'test-device-001';
-      await supabase.from('devices').upsert({ push_token: deviceId }, { onConflict: 'push_token' });
-      await supabase.from('watchlists').delete().eq('push_token', deviceId);
-      const rows = list.map((symbol) => ({ push_token: deviceId, symbol }));
-      if (rows.length > 0) await supabase.from('watchlists').insert(rows);
-      console.log('Synced watchlist to Supabase:', list);
-    } catch (e) {
-      console.error('Supabase sync error:', e);
-    }
-  };
-
-useEffect(() => {
+  useEffect(() => {
     const initialize = async () => {
+      const token = await registerForPushNotifications();
+      if (token) pushToken.current = token;
       const saved = await loadSavedStocks();
       setStocks(saved);
       await loadAllStocks(saved);
-      await syncWatchlistToSupabase(saved);
+      if (token) await saveDeviceToSupabase(token, saved);
     };
     initialize();
   }, []);
