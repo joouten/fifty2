@@ -4,7 +4,7 @@ import * as Notifications from 'expo-notifications';
 import { useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Alert, FlatList, RefreshControl, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
-const API_KEY = 'f5934b9aceb447c2a92af524d363b7bd';
+const API_KEY = process.env.EXPO_PUBLIC_TWELVE_DATA_API_KEY!;
 const DEFAULT_STOCKS = ['AAPL', 'MSFT', 'GOOGL'];
 const STORAGE_KEY = 'fifty2_watchlist';
 
