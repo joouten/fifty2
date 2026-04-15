@@ -3,6 +3,7 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!
 const SUPABASE_SERVICE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
 const TWELVE_DATA_API_KEY = Deno.env.get('TWELVE_DATA_API_KEY')!
+const CRON_SECRET = Deno.env.get('CRON_SECRET')!
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY)
 
@@ -49,7 +50,13 @@ async function recordNotification(deviceId: string, pushToken: string, symbol: s
   })
 }
 
-Deno.serve(async () => {
+Deno.serve(async (req) => {
+  // Verify secret header
+  const authHeader = req.headers.get('x-cron-secret')
+  if (authHeader !== CRON_SECRET) {
+    return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401 })
+  }
+
   try {
     const { data: watchlists } = await supabase
       .from('watchlists')
