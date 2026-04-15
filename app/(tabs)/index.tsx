@@ -1,4 +1,4 @@
-import { supabase } from '@/app/supabase';
+import { getOrCreateDeviceId, supabase } from '@/app/supabase';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Notifications from 'expo-notifications';
 import { useEffect, useRef, useState } from 'react';
@@ -7,6 +7,7 @@ import { ActivityIndicator, Alert, FlatList, Platform, RefreshControl, StyleShee
 const API_KEY = process.env.EXPO_PUBLIC_TWELVE_DATA_API_KEY!;
 const DEFAULT_STOCKS = ['AAPL', 'MSFT', 'GOOGL'];
 const STORAGE_KEY = 'fifty2_watchlist';
+const MAX_WATCHLIST_SIZE = 20;
 
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
@@ -43,10 +44,17 @@ async function registerForPushNotifications() {
   return token;
 }
 
-async function saveDeviceToSupabase(token: string, stocks: string[]) {
-  await supabase.from('devices').upsert({ push_token: token }, { onConflict: 'push_token' });
-  await supabase.from('watchlists').delete().eq('push_token', token);
-  const rows = stocks.map((symbol) => ({ push_token: token, symbol }));
+async function saveDeviceToSupabase(deviceId: string, token: string, stocks: string[]) {
+  await supabase
+    .from('devices')
+    .upsert({ device_id: deviceId, push_token: token }, { onConflict: 'device_id' });
+
+  await supabase
+    .from('watchlists')
+    .delete()
+    .eq('device_id', deviceId);
+
+  const rows = stocks.map((symbol) => ({ device_id: deviceId, push_token: token, symbol }));
   await supabase.from('watchlists').insert(rows);
 }
 
@@ -58,12 +66,13 @@ export default function WatchlistScreen() {
   const [adding, setAdding] = useState(false);
   const [newSymbol, setNewSymbol] = useState('');
   const pushToken = useRef(null);
+  const deviceId = useRef(null);
 
   const saveStocks = async (list) => {
     try {
       await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(list));
-      if (pushToken.current) {
-        await saveDeviceToSupabase(pushToken.current, list);
+      if (deviceId.current && pushToken.current) {
+        await saveDeviceToSupabase(deviceId.current, pushToken.current, list);
       }
     } catch (e) {
       console.error('Failed to save stocks', e);
@@ -126,12 +135,14 @@ export default function WatchlistScreen() {
 
   useEffect(() => {
     const initialize = async () => {
+      const id = await getOrCreateDeviceId();
+      deviceId.current = id;
       const token = await registerForPushNotifications();
       if (token) pushToken.current = token;
       const saved = await loadSavedStocks();
       setStocks(saved);
       await loadAllStocks(saved);
-      if (token) await saveDeviceToSupabase(token, saved);
+      if (token) await saveDeviceToSupabase(id, token, saved);
     };
     initialize();
   }, []);
@@ -139,6 +150,19 @@ export default function WatchlistScreen() {
   const addStock = async () => {
     const symbol = newSymbol.trim().toUpperCase();
     if (!symbol) return;
+
+    // Input validation
+    if (!/^[A-Z]{1,10}$/.test(symbol)) {
+      Alert.alert('Invalid symbol', 'Stock symbols can only contain letters (max 10 characters).');
+      return;
+    }
+
+    // Watchlist size cap
+    if (stocks.length >= MAX_WATCHLIST_SIZE) {
+      Alert.alert('Watchlist full', `You can track a maximum of ${MAX_WATCHLIST_SIZE} stocks.`);
+      return;
+    }
+
     if (stocks.includes(symbol)) {
       Alert.alert('Already added', `${symbol} is already in your watchlist.`);
       return;

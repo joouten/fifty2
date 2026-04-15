@@ -20,12 +20,12 @@ async function fetchQuote(symbol: string) {
   }
 }
 
-async function alreadyNotified(pushToken: string, symbol: string, alertType: string) {
+async function alreadyNotified(deviceId: string, symbol: string, alertType: string) {
   const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()
   const { data } = await supabase
     .from('notifications_sent')
     .select('id')
-    .eq('push_token', pushToken)
+    .eq('device_id', deviceId)
     .eq('symbol', symbol)
     .eq('alert_type', alertType)
     .gte('sent_at', oneDayAgo)
@@ -40,15 +40,20 @@ async function sendNotification(pushToken: string, title: string, body: string) 
   })
 }
 
-async function recordNotification(pushToken: string, symbol: string, alertType: string) {
-  await supabase.from('notifications_sent').insert({ push_token: pushToken, symbol, alert_type: alertType })
+async function recordNotification(deviceId: string, pushToken: string, symbol: string, alertType: string) {
+  await supabase.from('notifications_sent').insert({
+    device_id: deviceId,
+    push_token: pushToken,
+    symbol,
+    alert_type: alertType
+  })
 }
 
 Deno.serve(async () => {
   try {
     const { data: watchlists } = await supabase
       .from('watchlists')
-      .select('push_token, symbol')
+      .select('device_id, push_token, symbol')
 
     if (!watchlists || watchlists.length === 0) {
       return new Response(JSON.stringify({ message: 'No watchlists found' }), { status: 200 })
@@ -65,7 +70,7 @@ Deno.serve(async () => {
 
     let notificationsSent = 0
 
-    for (const { push_token, symbol } of watchlists) {
+    for (const { device_id, push_token, symbol } of watchlists) {
       const quote = quotes[symbol]
       if (!quote) continue
 
@@ -73,19 +78,19 @@ Deno.serve(async () => {
       const threshold = 0.01
 
       if (Math.abs(current - high52) / high52 <= threshold) {
-        const alerted = await alreadyNotified(push_token, symbol, '52w_high')
+        const alerted = await alreadyNotified(device_id, symbol, '52w_high')
         if (!alerted) {
           await sendNotification(push_token, `${symbol} 52W High Alert`, `${symbol} is at $${current.toFixed(2)}, near its 52-week high of $${high52.toFixed(2)}`)
-          await recordNotification(push_token, symbol, '52w_high')
+          await recordNotification(device_id, push_token, symbol, '52w_high')
           notificationsSent++
         }
       }
 
       if (Math.abs(current - low52) / low52 <= threshold) {
-        const alerted = await alreadyNotified(push_token, symbol, '52w_low')
+        const alerted = await alreadyNotified(device_id, symbol, '52w_low')
         if (!alerted) {
           await sendNotification(push_token, `${symbol} 52W Low Alert`, `${symbol} is at $${current.toFixed(2)}, near its 52-week low of $${low52.toFixed(2)}`)
-          await recordNotification(push_token, symbol, '52w_low')
+          await recordNotification(device_id, push_token, symbol, '52w_low')
           notificationsSent++
         }
       }
@@ -96,6 +101,6 @@ Deno.serve(async () => {
       { status: 200 }
     )
   } catch (error) {
-    return new Response(JSON.stringify({ error: error.message }), { status: 500 })
+    return new Response(JSON.stringify({ error: 'Internal server error' }), { status: 500 })
   }
 })
