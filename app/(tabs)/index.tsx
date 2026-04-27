@@ -40,8 +40,7 @@ async function registerForPushNotifications() {
   const token = (await Notifications.getExpoPushTokenAsync({
     projectId: 'fe77dc3f-5b8a-454b-98e7-d7b2b0c77225'
   })).data;
-  console.log('Push token:', token);
-  return token;
+    return token;
 }
 
 async function saveDeviceToSupabase(deviceId: string, token: string, stocks: string[]) {
@@ -133,19 +132,32 @@ export default function WatchlistScreen() {
     setRefreshing(false);
   };
 
-  useEffect(() => {
-    const initialize = async () => {
+useEffect(() => {
+  const initialize = async () => {
+    try {
       const id = await getOrCreateDeviceId();
       deviceId.current = id;
+    } catch (e) {
+      console.error('Device ID error', e);
+    }
+    try {
       const token = await registerForPushNotifications();
       if (token) pushToken.current = token;
       const saved = await loadSavedStocks();
       setStocks(saved);
       await loadAllStocks(saved);
-      if (token) await saveDeviceToSupabase(id, token, saved);
-    };
-    initialize();
-  }, []);
+      if (pushToken.current && deviceId.current) {
+        await saveDeviceToSupabase(deviceId.current, pushToken.current, saved);
+      }
+    } catch (e) {
+      console.error('Initialization error', e);
+      const saved = await loadSavedStocks();
+      setStocks(saved);
+      await loadAllStocks(saved);
+    }
+  };
+  initialize();
+}, []);
 
   const addStock = async () => {
     const symbol = newSymbol.trim().toUpperCase();

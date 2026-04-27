@@ -23,8 +23,8 @@ export async function getOrCreateDeviceId(): Promise<string> {
     const newId = generateUUID();
     await SecureStore.setItemAsync(DEVICE_ID_KEY, newId);
     return newId;
-  } catch (e) {
+} catch (e) {
     console.error('Failed to get/create device ID', e);
-    throw e;
+    return generateUUID();  // ← replace with this
   }
 }
