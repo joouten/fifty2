@@ -1,50 +1,60 @@
-# Welcome to your Expo app 👋
+# Fifty2
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+A stock tracking app for Android and iPhone that displays the 52-week high, 
+current price, and 52-week low for user-selected stocks. Users receive push 
+notifications when a stock hits its 52-week high or low.
 
-## Get started
+Built by a non-developer using AI-assisted development — zero prior coding 
+experience. Currently in closed alpha testing on Google Play.
 
-1. Install dependencies
+---
 
-   ```bash
-   npm install
-   ```
+## What It Does
 
-2. Start the app
+- Track up to 20 stocks on a personal watchlist
+- Live price data with pull-to-refresh
+- Push notifications when any stock hits its 52-week high or low
+- 24-hour duplicate notification prevention per symbol
+- Persistent watchlist across sessions
 
-   ```bash
-   npx expo start
-   ```
+## Tech Stack
 
-In the output, you'll find options to open the app in a
+- React Native with Expo SDK 54
+- TypeScript
+- Supabase (PostgreSQL + Edge Functions + pgcron)
+- Twelve Data API for live stock prices
+- Expo Push Notifications
+- EAS Build (Google Play closed alpha)
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+## Architecture
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+- Device identity via UUID stored in expo-secure-store
+- Hourly price checks via Supabase Edge Function + pg_cron
+- Push notifications sent via Expo push service when within 1% of 52W high/low
+- RLS enabled on all Supabase tables — rows restricted by device_id
 
-## Get a fresh project
+## Security
 
-When you're ready, run:
+This app uses the Supabase anon key in the client, which is intentional and 
+standard practice for React Native apps. The anon key is a public-facing 
+credential designed to be included in client applications. It does not grant 
+privileged access. Security is enforced through:
 
-```bash
-npm run reset-project
-```
+- Row Level Security (RLS) on all three database tables
+- Device-scoped data access — each device can only read/write its own rows
+- Input validation on stock symbols (regex enforced)
+- Watchlist cap of 20 stocks per device
+- Edge Function protected with x-cron-secret header
+- Sanitized error messages — no internal details exposed
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+## Status
 
-## Learn more
+- Google Play closed alpha — 13 testers active as of April 2026
+- Phase 5 in progress: color theme update, Apple App Store pending Mac purchase
 
-To learn more about developing your project with Expo, look at the following resources:
+## About
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
-
-## Join the community
-
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+Built as a solo project to learn AI-assisted mobile development. Every line 
+of code was written in collaboration with Claude. The project demonstrates 
+what's possible when domain knowledge and AI capability combine — shipping 
+a production-grade app with no prior coding background.
