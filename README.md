@@ -7,7 +7,7 @@ notifications when a stock hits its 52-week high or low.
 Built by a non-developer using AI-assisted development — zero prior coding 
 experience. Currently in closed alpha testing on Google Play.
 
-![Fifty2 App Preview](assets/screenshots/app-preview.png)
+<img src="assets/screenshots/app-preview.png" width="300" alt="Fifty2 App Preview">
 
 ---
 
