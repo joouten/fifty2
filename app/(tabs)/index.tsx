@@ -4,7 +4,6 @@ import * as Notifications from 'expo-notifications';
 import { useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Alert, FlatList, Platform, RefreshControl, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
-const API_KEY = process.env.EXPO_PUBLIC_TWELVE_DATA_API_KEY!;
 const DEFAULT_STOCKS = ['AAPL', 'MSFT', 'GOOGL'];
 const STORAGE_KEY = 'fifty2_watchlist';
 const MAX_WATCHLIST_SIZE = 20;
@@ -89,11 +88,10 @@ export default function WatchlistScreen() {
 
   const fetchStockData = async (symbol) => {
     try {
-      const res = await fetch(
-        `https://api.twelvedata.com/quote?symbol=${symbol}&apikey=${API_KEY}`
-      );
-      const data = await res.json();
-      if (data.status === 'error' || !data.close) return null;
+      const { data, error } = await supabase.functions.invoke('stock-quote', {
+        body: { symbol },
+      });
+      if (error || !data || data.status === 'error' || !data.close) return null;
       const current = parseFloat(data.close);
       const high = parseFloat(data.fifty_two_week?.high);
       const low = parseFloat(data.fifty_two_week?.low);
