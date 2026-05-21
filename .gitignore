@@ -42,3 +42,7 @@ app-example
 /ios
 /android
 .env
+
+# chat-workflow scratch
+CODE_TO_CHAT.md
+CHAT_TO_CODE.md

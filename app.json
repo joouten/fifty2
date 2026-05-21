@@ -41,10 +41,11 @@
       [
         "expo-notifications",
         {
-          "color": "#4fc3f7",
+          "color": "#5C8C4A",
           "defaultChannel": "default"
         }
-      ]
+      ],
+      "expo-web-browser"
     ],
     "experiments": {
       "typedRoutes": true,

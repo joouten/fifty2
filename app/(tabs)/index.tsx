@@ -1,8 +1,9 @@
 import { getOrCreateDeviceId, supabase } from '@/app/supabase';
+import { BrandColors } from '@/constants/theme';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Notifications from 'expo-notifications';
 import { useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, Alert, FlatList, Platform, RefreshControl, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Alert, FlatList, Image, Platform, RefreshControl, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
 const DEFAULT_STOCKS = ['AAPL', 'MSFT', 'GOOGL'];
 const STORAGE_KEY = 'fifty2_watchlist';
@@ -23,7 +24,7 @@ async function registerForPushNotifications() {
       name: 'default',
       importance: Notifications.AndroidImportance.MAX,
       vibrationPattern: [0, 250, 250, 250],
-      lightColor: '#4fc3f7',
+      lightColor: BrandColors.tint,
     });
   }
   const { status: existingStatus } = await Notifications.getPermissionsAsync();
@@ -231,7 +232,12 @@ useEffect(() => {
   return (
     <View style={styles.container}>
       <View style={styles.headerRow}>
-        <Text style={styles.header}>Fifty2</Text>
+        <Image
+          source={require('../../assets/images/icon.png')}
+          style={styles.headerLogo}
+          resizeMode="contain"
+          accessibilityLabel="FIFTY2"
+        />
         <TouchableOpacity style={styles.addButton} onPress={() => setAdding(!adding)}>
           <Text style={styles.addButtonText}>{adding ? '✕' : '+'}</Text>
         </TouchableOpacity>
@@ -241,7 +247,7 @@ useEffect(() => {
           <TextInput
             style={styles.input}
             placeholder="Enter symbol (e.g. TSLA)"
-            placeholderTextColor="#a0a8c0"
+            placeholderTextColor={BrandColors.textSecondary}
             value={newSymbol}
             onChangeText={setNewSymbol}
             autoCapitalize="characters"
@@ -253,7 +259,7 @@ useEffect(() => {
         </View>
       )}
       {loading ? (
-        <ActivityIndicator size="large" color="#4fc3f7" style={styles.loader} />
+        <ActivityIndicator size="large" color={BrandColors.tint} style={styles.loader} />
       ) : (
         <FlatList
           data={stocks}
@@ -264,8 +270,8 @@ useEffect(() => {
             <RefreshControl
               refreshing={refreshing}
               onRefresh={onRefresh}
-              tintColor="#4fc3f7"
-              colors={['#4fc3f7']}
+              tintColor={BrandColors.tint}
+              colors={[BrandColors.tint]}
             />
           }
         />
@@ -276,24 +282,24 @@ useEffect(() => {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#0f0f1a', paddingTop: 60 },
+  container: { flex: 1, backgroundColor: BrandColors.background, paddingTop: 60 },
   headerRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 20, marginBottom: 20 },
-  header: { fontSize: 32, fontWeight: 'bold', color: '#ffffff' },
-  addButton: { width: 40, height: 40, borderRadius: 20, backgroundColor: '#4fc3f7', alignItems: 'center', justifyContent: 'center' },
-  addButtonText: { fontSize: 24, color: '#0f0f1a', fontWeight: 'bold', lineHeight: 28 },
+  headerLogo: { width: 96, height: 48 },
+  addButton: { width: 40, height: 40, borderRadius: 20, backgroundColor: BrandColors.tint, alignItems: 'center', justifyContent: 'center' },
+  addButtonText: { fontSize: 24, color: BrandColors.background, fontWeight: 'bold', lineHeight: 28 },
   inputRow: { flexDirection: 'row', paddingHorizontal: 20, marginBottom: 16, gap: 10 },
-  input: { flex: 1, backgroundColor: '#1a1a2e', borderRadius: 10, paddingHorizontal: 14, paddingVertical: 10, color: '#ffffff', fontSize: 16 },
-  goButton: { backgroundColor: '#4fc3f7', borderRadius: 10, paddingHorizontal: 18, justifyContent: 'center' },
-  goButtonText: { color: '#0f0f1a', fontWeight: 'bold', fontSize: 16 },
+  input: { flex: 1, backgroundColor: BrandColors.surface, borderRadius: 10, paddingHorizontal: 14, paddingVertical: 10, color: BrandColors.textPrimary, fontSize: 16 },
+  goButton: { backgroundColor: BrandColors.tint, borderRadius: 10, paddingHorizontal: 18, justifyContent: 'center' },
+  goButtonText: { color: BrandColors.background, fontWeight: 'bold', fontSize: 16 },
   loader: { marginTop: 40 },
   list: { paddingHorizontal: 20 },
-  card: { backgroundColor: '#1a1a2e', borderRadius: 12, padding: 16, marginBottom: 12 },
-  symbol: { fontSize: 20, fontWeight: 'bold', color: '#ffffff', marginBottom: 12 },
+  card: { backgroundColor: BrandColors.surface, borderRadius: 12, padding: 16, marginBottom: 12 },
+  symbol: { fontSize: 20, fontWeight: 'bold', color: BrandColors.textPrimary, marginBottom: 12 },
   dataRow: { flexDirection: 'row', justifyContent: 'space-between' },
   dataItem: { alignItems: 'center' },
-  dataLabel: { fontSize: 12, color: '#a0a8c0', marginBottom: 4 },
-  highValue: { fontSize: 18, fontWeight: '600', color: '#52b788' },
-  currentValue: { fontSize: 18, fontWeight: '600', color: '#4fc3f7' },
-  lowValue: { fontSize: 18, fontWeight: '600', color: '#e63946' },
-  hint: { textAlign: 'center', color: '#a0a8c0', fontSize: 12, paddingBottom: 16 },
+  dataLabel: { fontSize: 12, color: BrandColors.textSecondary, marginBottom: 4 },
+  highValue: { fontSize: 18, fontWeight: '600', color: BrandColors.tintLight },
+  currentValue: { fontSize: 18, fontWeight: '600', color: BrandColors.textPrimary },
+  lowValue: { fontSize: 18, fontWeight: '600', color: BrandColors.danger },
+  hint: { textAlign: 'center', color: BrandColors.textSecondary, fontSize: 12, paddingBottom: 16 },
 });

@@ -1,5 +1,7 @@
 import { StyleSheet, Text, View } from 'react-native';
 
+import { BrandColors } from '@/constants/theme';
+
 export default function SettingsScreen() {
   return (
     <View style={styles.container}>
@@ -32,12 +34,12 @@ export default function SettingsScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#0f0f1a', paddingTop: 60 },
-  header: { fontSize: 32, fontWeight: 'bold', color: '#ffffff', paddingHorizontal: 20, marginBottom: 30 },
-  section: { backgroundColor: '#1a1a2e', borderRadius: 12, marginHorizontal: 20, marginBottom: 20, paddingHorizontal: 16 },
-  sectionTitle: { fontSize: 12, color: '#a0a8c0', paddingTop: 14, paddingBottom: 8, textTransform: 'uppercase', letterSpacing: 1 },
-  row: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 12, borderTopWidth: 0.5, borderTopColor: '#2a2a3e' },
-  label: { fontSize: 16, color: '#ffffff' },
-  value: { fontSize: 16, color: '#a0a8c0' },
-  hint: { textAlign: 'center', color: '#a0a8c0', fontSize: 12, marginTop: 10 },
+  container: { flex: 1, backgroundColor: BrandColors.background, paddingTop: 60 },
+  header: { fontSize: 32, fontWeight: 'bold', color: BrandColors.textPrimary, paddingHorizontal: 20, marginBottom: 30 },
+  section: { backgroundColor: BrandColors.surface, borderRadius: 12, marginHorizontal: 20, marginBottom: 20, paddingHorizontal: 16 },
+  sectionTitle: { fontSize: 12, color: BrandColors.textSecondary, paddingTop: 14, paddingBottom: 8, textTransform: 'uppercase', letterSpacing: 1 },
+  row: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 12, borderTopWidth: 0.5, borderTopColor: BrandColors.border },
+  label: { fontSize: 16, color: BrandColors.textPrimary },
+  value: { fontSize: 16, color: BrandColors.textSecondary },
+  hint: { textAlign: 'center', color: BrandColors.textSecondary, fontSize: 12, marginTop: 10 },
 });
