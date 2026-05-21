@@ -46,3 +46,6 @@ app-example
 # chat-workflow scratch
 CODE_TO_CHAT.md
 CHAT_TO_CODE.md
+
+# EAS release artifacts
+.eas-release-notes.txt
